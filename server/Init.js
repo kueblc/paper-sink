@@ -9,7 +9,7 @@ var log = require('./Logger.js').log('PaperSink'),
 
 // where the server is being hosted
 var HOST = undefined,
-	PORT = 80;
+	PORT = 8124;
 
 // serve static files
 var PATH = 'client/',

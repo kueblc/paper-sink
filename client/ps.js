@@ -3,7 +3,8 @@
  * Paper-Sink simple message router, client side component
  */
 
-var TIMEOUT = 500;
+// how long to wait in between AJAX requests
+var TIMEOUT = 250;
 
 function PS( roomId, onconnect, onreceive, ondisconnect ){
 	var self = this;

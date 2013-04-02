@@ -7,7 +7,7 @@ var log = require('./Logger.js').log('PS-Router'),
 	PS = exports;
 
 // auto disconnect timeout in ms
-var TIMEOUT = 2000;
+var TIMEOUT = 5000;
 
 // maps clientId to Client object
 var clients = {};
