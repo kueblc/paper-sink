@@ -8,25 +8,38 @@ html {
 }
 
 body {
-	
+	color: 555;
+	font-family: "Trebuchet MS", sans-serif;
 }
 
-#wrapper {
-	
+#output, #footer, #input {
+	position: absolute;
+	width: 100%;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
 }
 
-#header {
-	
+#output {
+	top: 0;
+	bottom: 44px;
+	overflow: auto;
 }
 
-#nav {
-	
-}
-
-#content {
-	
+#output li {
+	padding: 8px;
+	border-bottom: 1px solid #ccc;
 }
 
 #footer {
-	
+	height: 44px;
+	bottom: 0;
+	padding: 8px;
+	border-top: 1px solid #ccc;
 }
+
+#input {
+	position: relative;
+	height: 100%;
+}
+

@@ -17,11 +17,14 @@
 					var e = document.createElement('li');
 					e.textContent = e.innerText = s;
 					output.appendChild( e );
+					// scroll to the bottom
+					output.scrollTop = output.scrollHeight;
 				};
 				// GET A ROOM
-				var roomId = prompt("Which room would you like to join?");
+				var roomId = prompt("Which room would you like to join?")
+					|| 'default';
 				// set up PS
-				var ps = PS( roomId || 'default',
+				var ps = PS( roomId,
 					function onconnect(){ println("Connected to "+roomId); },
 					function onreceive(data){ println(data); },
 					function ondisconnect(){ println("Disconnected from "+roomId); } );
@@ -40,6 +43,6 @@
 	</head>
 	<body>
 		<ol id='output'></ol>
-		<input id='input' type='text'>
+		<div id='footer'><input id='input' type='text'></div>
 	</body>
 </html>
