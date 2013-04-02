@@ -80,10 +80,14 @@ function disconnect( clientId ){
 	var room = rooms[ roomId ];
 	// remove client from room
 	room.splice( room.indexOf(clientId), 1 );
-	if( !room.length ) delete rooms[ roomId ];
 	// delete client object
 	delete clients[ clientId ];
 	log.notify( clientId + " left " + roomId );
+	// clean up empty rooms
+	if( !room.length ){
+		delete rooms[ roomId ];
+		log.notify( "closed room " + roomId );
+	}
 };
 
 // class representing a single connected client
