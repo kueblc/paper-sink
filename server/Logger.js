@@ -8,7 +8,7 @@ var Logger = exports;
 
 var levels = [ "DEBUG", "INFO", "WARNING", "ERROR" ];
 
-Logger.level = 0;
+Logger.level = 1;
 
 var onMessage = function( level, src, msg ){
 	if( Logger.level <= level ){

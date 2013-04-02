@@ -67,7 +67,7 @@ WebServer.serve = function( path, filename ){
 	getMap[filename] = function( request, respond ){
 		getFile( function(){
 			if(file){
-				log.debug('serving '+filename);
+				log.notify('serving '+filename);
 				respond( 200, type, file );
 			} else {
 				notfoundHandler(request,respond);

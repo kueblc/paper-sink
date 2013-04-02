@@ -54,7 +54,7 @@ function update( clientId, states ){
 	var roomId = client.roomId;
 	var room = rooms[ roomId ];
 	if( states && states.length ){
-		log.debug( "Client " + clientId + " says: " + states );
+		log.notify( "Client " + clientId + " says: " + states );
 		for( var i = 0; i < room.length; i++ ){
 			var neighbor = room[i];
 		// TODO determine a good reason to skip messages to self
