@@ -11,6 +11,9 @@ function PS( roomId, onconnect, onreceive, ondisconnect ){
 	var queue = [];
 	self.send = function( data ){
 		queue.push( data );
+		// update immediately
+		if( self.timer ) clearTimeout( self.timer );
+		update();
 	};
 	AJAX( 'connect', JSON.stringify({'roomId':roomId}),
 		function( status, text ){

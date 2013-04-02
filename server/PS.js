@@ -57,7 +57,8 @@ function update( clientId, states ){
 		log.debug( "Client " + clientId + " says: " + states );
 		for( var i = 0; i < room.length; i++ ){
 			var neighbor = room[i];
-			if( neighbor === clientId ) continue;
+		// TODO determine a good reason to skip messages to self
+		//	if( neighbor === clientId ) continue;
 			clients[ neighbor ].send( states );
 		}
 	}

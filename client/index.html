@@ -21,16 +21,16 @@
 				// GET A ROOM
 				var roomId = prompt("Which room would you like to join?");
 				// set up PS
-				var ps = PS( roomId,
+				var ps = PS( roomId || 'default',
 					function onconnect(){ println("Connected to "+roomId); },
-					function onreceive(data){ println("Received: "+data); },
+					function onreceive(data){ println(data); },
 					function ondisconnect(){ println("Disconnected from "+roomId); } );
 				// detect submit
 				input.onkeypress = function(e){
 					var e = e || window.event;
 					var key = e.which || e.keyCode || e.charCode;
 					if( key === 13 ){
-						println( "Sent: "+input.value );
+					//	println( "Sent: "+input.value );
 						ps.send( input.value );
 						input.value = '';
 					}
