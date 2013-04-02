@@ -33,6 +33,8 @@
 					function ondisconnect(){
 						println( "Disconnected from " + roomId, 'info' );
 					} );
+				// try to let the server know if we disconnect
+				window.onunload = ps.disconnect;
 				// detect submit
 				input.onkeypress = function(e){
 					var e = e || window.event;
