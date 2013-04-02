@@ -29,17 +29,18 @@ function connect( roomId ){
 	var client = new Client( roomId );
 	var clientId = nextId();
 	clients[ clientId ] = client;
-	log.debug( (roomId in rooms) ? "connecting to room "+roomId : "new room "+roomId );
-	if( roomId in rooms )
+	if( roomId in rooms ){
 		rooms[ roomId ].push( clientId );
-	else
+	} else {
 		rooms[ roomId ] = [ clientId ];
+		log.notify( "new room " + roomId );
+	}
 	// schedule disconnect
 	client.timer = setTimeout(
 		function(){ disconnect( clientId ); },
 		TIMEOUT
 	);
-	log.notify( "Client " + clientId + " connected" );
+	log.notify( clientId + " joined " + roomId );
 	return clientId;
 };
 
@@ -54,7 +55,7 @@ function update( clientId, states ){
 	var roomId = client.roomId;
 	var room = rooms[ roomId ];
 	if( states && states.length ){
-		log.notify( "Client " + clientId + " says: " + states );
+		log.notify( clientId + " says: " + states );
 		for( var i = 0; i < room.length; i++ ){
 			var neighbor = room[i];
 		// TODO determine a good reason to skip messages to self
@@ -79,9 +80,10 @@ function disconnect( clientId ){
 	var room = rooms[ roomId ];
 	// remove client from room
 	room.splice( room.indexOf(clientId), 1 );
+	if( !room.length ) delete rooms[ roomId ];
 	// delete client object
 	delete clients[ clientId ];
-	log.notify( "Client " + clientId + " disconnected" );
+	log.notify( clientId + " left " + roomId );
 };
 
 // class representing a single connected client
