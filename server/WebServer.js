@@ -10,7 +10,7 @@ var WebServer = exports,
 	http = require('http');
 
 var notfoundHandler = function( request, respond ){
-	log.warn('serving 404');
+	log.warn( 'serving 404 at ' + request.url );
 	var body = '<h1>404 NOT FOUND</h1>';
 	respond( 404, 'text/html', body );
 };
@@ -79,7 +79,7 @@ WebServer.serve = function( path, filename ){
 WebServer.init = function( HOST, PORT ){
 	var server = http.createServer(
 		function( request, response ){
-			log.notify( request.method + ' request for ' +
+			log.debug( request.method + ' request for ' +
 				request.url + ' from ' + request.connection.remoteAddress );
 			var handler;
 			var url = request.url.substring(1) || 'index.html';
