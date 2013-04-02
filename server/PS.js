@@ -15,11 +15,8 @@ var clients = {};
 // maps roomId to list of clientIds
 var rooms = {};
 
-// utility for generating clientIds
-var lastUsedId = 1;
-function nextId(){
-	return lastUsedId++;
-};
+// guarantee unique clientIds by keeping track of last used
+var lastUsedId = 0;
 
 // creates a Client object
 // updates 'clients' and 'rooms'
@@ -27,7 +24,8 @@ function nextId(){
 // returns clientId
 function connect( roomId ){
 	var client = new Client( roomId );
-	var clientId = nextId();
+	// generate a new clientId utilizing 0..9, a..z
+	var clientId = (++lastUsedId).toString(36);
 	clients[ clientId ] = client;
 	if( roomId in rooms ){
 		rooms[ roomId ].push( clientId );
