@@ -8,7 +8,6 @@ html {
 }
 
 body {
-	color: 555;
 	font-family: "Trebuchet MS", sans-serif;
 }
 
@@ -41,5 +40,9 @@ body {
 #input {
 	position: relative;
 	height: 100%;
+}
+
+.info {
+	font-weight: bold;
 }
 

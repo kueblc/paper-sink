@@ -13,9 +13,10 @@
 				var output = $('output'),
 					input = $('input');
 				// function to append to the output pane
-				function println(s){
+				function println( s, style ){
 					var e = document.createElement('li');
 					e.textContent = e.innerText = s;
+					e.className = style;
 					output.appendChild( e );
 					// scroll to the bottom
 					output.scrollTop = output.scrollHeight;
@@ -25,9 +26,13 @@
 					|| 'default';
 				// set up PS
 				var ps = PS( roomId,
-					function onconnect(){ println("Connected to "+roomId); },
+					function onconnect(){
+						println( "Connected to " + roomId, 'info' );
+					},
 					function onreceive(data){ println(data); },
-					function ondisconnect(){ println("Disconnected from "+roomId); } );
+					function ondisconnect(){
+						println( "Disconnected from " + roomId, 'info' );
+					} );
 				// detect submit
 				input.onkeypress = function(e){
 					var e = e || window.event;
@@ -38,6 +43,8 @@
 						input.value = '';
 					}
 				};
+				// so users can start typing right away
+				input.focus();
 			};
 		</script>
 	</head>
