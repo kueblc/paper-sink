@@ -12,7 +12,7 @@ function PS( roomId, onconnect, onreceive, ondisconnect ){
 	self.send = function( data ){
 		queue.push( data );
 		// update immediately
-		if( self.timer ) clearTimeout( self.timer );
+		self.timer && clearTimeout( self.timer );
 		update();
 	};
 	AJAX( 'connect', JSON.stringify({'roomId':roomId}),
@@ -24,7 +24,7 @@ function PS( roomId, onconnect, onreceive, ondisconnect ){
 				onconnect();
 				// start polling routine
 				self.timer = setTimeout( update, TIMEOUT );
-			}
+			} else ondisconnect();
 		} );
 	var update = function(){
 		var query = queue.length ?
@@ -41,19 +41,16 @@ function PS( roomId, onconnect, onreceive, ondisconnect ){
 					for( var i = 0; i < states.length; i++ )
 						onreceive( states[i] );
 					// schedule next update
+					self.timer && clearTimeout( self.timer );
 					self.timer = setTimeout( update, TIMEOUT );
-				}
+				} else ondisconnect();
 			} );
 	};
 	self.disconnect = function(){
-		if( self.timer ) clearTimeout( self.timer );
-		AJAX( 'disconnect', JSON.stringify({'clientId':self.clientId}),
-			function( status, text ){
-				if( status === 200 ){
-					// callback
-					ondisconnect();
-				}
-			} );
+		self.timer && clearTimeout( self.timer );
+		AJAX( 'disconnect',
+			JSON.stringify({ 'clientId':self.clientId }),
+			ondisconnect );
 	};
 	return self;
 };
