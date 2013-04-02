@@ -36,7 +36,6 @@ function PS( roomId, onconnect, onreceive, ondisconnect ){
 				if( status === 200 ){
 					// TODO more error checking
 					var states = JSON.parse( text ).states;
-					console.log(states);
 					// callback
 					for( var i = 0; i < states.length; i++ )
 						onreceive( states[i] );
