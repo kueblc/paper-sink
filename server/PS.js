@@ -15,17 +15,12 @@ var clients = {};
 // maps roomId to list of clientIds
 var rooms = {};
 
-// guarantee unique clientIds by keeping track of last used
-var lastUsedId = 0;
-
 // creates a Client object
 // updates 'clients' and 'rooms'
-// schedule disconnect in case of timeout
 // returns clientId
 function connect( roomId ){
 	var client = new Client( roomId );
-	// generate a new clientId utilizing 0..9, a..z
-	var clientId = (++lastUsedId).toString(36);
+	var clientId = client.clientId;
 	clients[ clientId ] = client;
 	if( roomId in rooms ){
 		rooms[ roomId ].push( clientId );
@@ -33,23 +28,15 @@ function connect( roomId ){
 		rooms[ roomId ] = [ clientId ];
 		log.notify( "new room " + roomId );
 	}
-	// schedule disconnect
-	client.timer = setTimeout(
-		function(){ disconnect( clientId ); },
-		TIMEOUT
-	);
 	log.notify( clientId + " joined " + roomId );
 	return clientId;
 };
 
 // publishes 'states' to the client's room
-// reschedules disconnect for timeout protection
 // returns state queue
 function update( clientId, states ){
 	if(!( clientId in clients )) throw "invalid clientId";
 	var client = clients[ clientId ];
-	// reset timeout
-	clearTimeout( client.timer );
 	var roomId = client.roomId;
 	var room = rooms[ roomId ];
 	if( states && states.length ){
@@ -61,18 +48,12 @@ function update( clientId, states ){
 			clients[ neighbor ].send( states );
 		}
 	}
-	// restart timeout
-	client.timer = setTimeout(
-		function(){ disconnect( clientId ); },
-		TIMEOUT
-	);
 	return clients[ clientId ].receive();
 };
 
-// updates 'clients' and 'rooms'
+// updates 'clients' and 'rooms', clear timers
 function disconnect( clientId ){
 	var client = clients[ clientId ];
-	// reset timeout
 	clearTimeout( client.timer );
 	var roomId = client.roomId;
 	var room = rooms[ roomId ];
@@ -88,13 +69,20 @@ function disconnect( clientId ){
 	}
 };
 
+// guarantee unique clientIds by keeping track of last used
+var lastUsedId = 0;
+
 // class representing a single connected client
 function Client( roomId ){
 	var self = this;
+	// generate a new clientId utilizing 0..9, a..z
+	self.clientId = (++lastUsedId).toString(36);
 	// which room this client belongs to
 	self.roomId = roomId;
-	// timeout timer (implicit)
-	//self.timer = 0;
+	// shortcut to self disconnect
+	self.disconnect = function(){ disconnect( self.clientId ); };
+	// schedule disconnect in case of timeout
+	self.timer = setTimeout( self.disconnect, TIMEOUT );
 	// message queue
 	self.queue = [];
 	// queues a message(s) for this client
@@ -103,8 +91,12 @@ function Client( roomId ){
 	};
 	// returns the queue
 	self.receive = function(){
+		// reset timeout
+		clearTimeout( self.timer );
 		var q = self.queue;
 		self.queue = [];
+		// restart timeout
+		self.timer = setTimeout( self.disconnect, TIMEOUT );
 		return q;
 	};
 	return self;
