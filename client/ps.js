@@ -3,19 +3,13 @@
  * Paper-Sink simple message router, client side component
  */
 
-// how long to wait in between AJAX requests
-var TIMEOUT = 250;
+// how long to wait in between AJAX requests in ms
+var TIMEOUT = 20;
 
 function PS( roomId, onconnect, onreceive, ondisconnect ){
 	var self = this;
-	var queue = [];
-	self.send = function( data ){
-		queue.push( data );
-		// update immediately
-		self.timer && clearTimeout( self.timer );
-		update();
-	};
-	AJAX( 'connect', JSON.stringify({'roomId':roomId}),
+	AJAX( 'connect',
+		JSON.stringify({'roomId':roomId}),
 		function( status, text ){
 			if( status === 200 ){
 				// TODO more error checking
@@ -23,30 +17,34 @@ function PS( roomId, onconnect, onreceive, ondisconnect ){
 				// callback
 				onconnect();
 				// start polling routine
-				self.timer = setTimeout( update, TIMEOUT );
+				self.timer = setTimeout( poll, TIMEOUT );
 			} else ondisconnect();
 		} );
-	var update = function(){
-		var query = queue.length ?
-			JSON.stringify({ 'clientId':self.clientId, 'states':queue }) :
-			JSON.stringify({ 'clientId':self.clientId });
-		queue = [];
-		AJAX( 'update', query,
+	self.send = function( data ){
+		AJAX( 'send',
+			JSON.stringify({ 'clientId':self.clientId, 'data':data }),
+			function( status, text ){
+				if( status !== 200 ) ondisconnect();
+			} );
+	};
+	var poll = function(){
+		AJAX( 'poll',
+			JSON.stringify({ 'clientId':self.clientId }),
 			function( status, text ){
 				if( status === 200 ){
 					// TODO more error checking
-					var states = JSON.parse( text ).states;
+					var data = JSON.parse( text ).data;
 					// callback
-					for( var i = 0; i < states.length; i++ )
-						onreceive( states[i] );
+					for( var i = 0; i < data.length; ++i )
+						onreceive( data[i] );
 					// schedule next update
-					self.timer && clearTimeout( self.timer );
-					self.timer = setTimeout( update, TIMEOUT );
+					clearTimeout( self.timer );
+					self.timer = setTimeout( poll, TIMEOUT );
 				} else ondisconnect();
 			} );
 	};
 	self.disconnect = function(){
-		self.timer && clearTimeout( self.timer );
+		clearTimeout( self.timer );
 		AJAX( 'disconnect',
 			JSON.stringify({ 'clientId':self.clientId }),
 			ondisconnect );

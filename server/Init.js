@@ -34,13 +34,12 @@ server.post( 'connect', function( request, respond ){
 	respond( status, 'text/json', JSON.stringify(body) );
 } );
 
-server.post( 'update', function( request, respond ){
+server.post( 'send', function( request, respond ){
 	var status = 200, body = {};
 	try {
 		var obj = JSON.parse( request.data );
 		if( !obj.clientId ) throw "no clientId specified";
-		if( !obj.states ) obj.states = []; 
-		body.states = PS.update( obj.clientId, obj.states );
+		PS.send( obj.clientId, obj.data );
 	} catch (e) {
 		status = 404;
 		log.error(e);
@@ -49,13 +48,33 @@ server.post( 'update', function( request, respond ){
 	respond( status, 'text/json', JSON.stringify(body) );
 } );
 
+server.post( 'poll', function( request, respond ){
+	var status = 200, body = {};
+	try {
+		var obj = JSON.parse( request.data );
+		if( !obj.clientId ) throw "no clientId specified";
+		PS.poll( obj.clientId, function( data ){
+			body.data = data;
+			respond( status, 'text/json', JSON.stringify(body) );
+		} );
+		// TODO detect client disconnection
+	//	request.socket.on( 'error', function(){
+	//		PS.disconnect( obj.clientId );
+	//	} );
+	} catch (e) {
+		status = 404;
+		log.error(e);
+		body.error = e;
+		respond( status, 'text/json', JSON.stringify(body) );
+	}
+} );
+
 server.post( 'disconnect', function( request, respond ){
 	var status = 200, body = {};
 	try {
 		var obj = JSON.parse( request.data );
 		if( !obj.clientId ) throw "no clientId specified";
 		PS.disconnect( obj.clientId );
-		body.success = true;
 	} catch (e) {
 		status = 404;
 		log.error(e);

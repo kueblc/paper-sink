@@ -7,7 +7,10 @@ var log = require('./Logger.js').log('PS-Router'),
 	PS = exports;
 
 // auto disconnect timeout in ms
-var TIMEOUT = 5000;
+var TIMEOUT = 500;
+
+// length of long poll in ms
+var POLL = 10000;
 
 // maps clientId to Client object
 var clients = {};
@@ -32,27 +35,41 @@ function connect( roomId ){
 	return clientId;
 };
 
-// publishes 'states' to the client's room
-// returns state queue
-function update( clientId, states ){
+// publishes data to the client's room
+function send( clientId, data ){
 	if(!( clientId in clients )) throw "invalid clientId";
 	var client = clients[ clientId ];
 	var roomId = client.roomId;
 	var room = rooms[ roomId ];
-	if( states && states.length ){
-		log.notify( clientId + " says: " + states );
-		for( var i = 0; i < room.length; i++ ){
-			var neighbor = room[i];
-		// TODO determine a good reason to skip messages to self
-		//	if( neighbor === clientId ) continue;
-			clients[ neighbor ].send( states );
-		}
+	log.notify( clientId + " says: " + data );
+	for( var i = 0; i < room.length; i++ ){
+		var neighbor = room[i];
+		clients[ neighbor ].send( data );
 	}
-	return clients[ clientId ].receive();
+};
+
+// waits for data to appear in queue or heartbeat
+function poll( clientId, callback ){
+	if(!( clientId in clients )) throw "invalid clientId";
+	log.debug( "poll from " + clientId );
+	var client = clients[ clientId ];
+	clearTimeout( client.timer );
+	if( client.queue.length ){
+		callback( client.receive() );
+	} else {
+		client.pending = function(){
+			clearTimeout( client.longpoll );
+			log.debug( "pushing to " + clientId );
+			client.pending = undefined;
+			callback( client.receive() );
+		};
+		client.longpoll = setTimeout( client.pending, POLL );
+	}
 };
 
 // updates 'clients' and 'rooms', clear timers
 function disconnect( clientId ){
+	if(!( clientId in clients )) throw "invalid clientId";
 	var client = clients[ clientId ];
 	clearTimeout( client.timer );
 	var roomId = client.roomId;
@@ -86,13 +103,12 @@ function Client( roomId ){
 	// message queue
 	self.queue = [];
 	// queues a message(s) for this client
-	self.send = function( states ){
-		self.queue = self.queue.concat( states );
+	self.send = function( data ){
+		self.queue.push( data );
+		self.pending && self.pending();
 	};
 	// returns the queue
 	self.receive = function(){
-		// reset timeout
-		clearTimeout( self.timer );
 		var q = self.queue;
 		self.queue = [];
 		// restart timeout
@@ -104,7 +120,8 @@ function Client( roomId ){
 
 // public API
 PS.connect = connect;
-PS.update = update;
+PS.send = send;
+PS.poll = poll;
 PS.disconnect = disconnect;
 
 
