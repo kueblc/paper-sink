@@ -58,9 +58,9 @@ server.post( 'poll', function( request, respond ){
 			respond( status, 'text/json', JSON.stringify(body) );
 		} );
 		// TODO detect client disconnection
-	//	request.socket.on( 'error', function(){
-	//		PS.disconnect( obj.clientId );
-	//	} );
+		request.on( 'error', function(){
+			PS.disconnect( obj.clientId );
+		} );
 	} catch (e) {
 		status = 404;
 		log.error(e);

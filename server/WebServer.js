@@ -81,7 +81,6 @@ WebServer.init = function( HOST, PORT ){
 		function( request, response ){
 			log.debug( request.method + ' request for ' +
 				request.url + ' from ' + request.connection.remoteAddress );
-			var handler;
 			var url = request.url.substring(1) || 'index.html';
 			var responder = function( status, type, data ){
 				response.writeHead( status,
@@ -90,6 +89,10 @@ WebServer.init = function( HOST, PORT ){
 				);
 				response.end(data);
 			};
+			// detect unsuccessful responses as request errors
+			response.on( 'close', function(){
+				request.emit( 'error' );
+			} );
 			switch( request.method ){
 				case 'GET':
 					if( getMap[url] )

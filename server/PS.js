@@ -72,6 +72,7 @@ function disconnect( clientId ){
 	if(!( clientId in clients )) throw "invalid clientId";
 	var client = clients[ clientId ];
 	clearTimeout( client.timer );
+	clearTimeout( client.longpoll );
 	var roomId = client.roomId;
 	var room = rooms[ roomId ];
 	// remove client from room
