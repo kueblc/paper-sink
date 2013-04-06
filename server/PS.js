@@ -53,7 +53,7 @@ function poll( clientId, callback ){
 	if(!( clientId in clients )) throw "invalid clientId";
 	log.debug( "poll from " + clientId );
 	var client = clients[ clientId ];
-	clearTimeout( client.timer );
+	client.clearTimeout();
 	if( client.queue.length ){
 		callback( client.receive() );
 	} else {
@@ -71,7 +71,7 @@ function poll( clientId, callback ){
 function disconnect( clientId ){
 	if(!( clientId in clients )) throw "invalid clientId";
 	var client = clients[ clientId ];
-	clearTimeout( client.timer );
+	client.clearTimeout();
 	clearTimeout( client.longpoll );
 	var roomId = client.roomId;
 	var room = rooms[ roomId ];
@@ -99,8 +99,19 @@ function Client( roomId ){
 	self.roomId = roomId;
 	// shortcut to self disconnect
 	self.disconnect = function(){ disconnect( self.clientId ); };
+	
+	/* timeout handling */
+	var disconnectTimer;
+	self.setTimeout = function(){
+		clearTimeout( disconnectTimer );
+		setTimeout( self.disconnect, TIMEOUT );
+	};
+	self.clearTimeout = function(){
+		clearTimeout( disconnectTimer );
+	};
+	
 	// schedule disconnect in case of timeout
-	self.timer = setTimeout( self.disconnect, TIMEOUT );
+	self.setTimeout();
 	// message queue
 	self.queue = [];
 	// queues a message(s) for this client
@@ -112,8 +123,7 @@ function Client( roomId ){
 	self.receive = function(){
 		var q = self.queue;
 		self.queue = [];
-		// restart timeout
-		self.timer = setTimeout( self.disconnect, TIMEOUT );
+		self.setTimeout();
 		return q;
 	};
 	return self;
