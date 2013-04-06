@@ -59,7 +59,9 @@ server.post( 'poll', function( request, respond ){
 		} );
 		// TODO detect client disconnection
 		request.on( 'error', function(){
-			PS.disconnect( obj.clientId );
+			try {
+				PS.disconnect( obj.clientId );
+			} catch (f) { }
 		} );
 	} catch (e) {
 		status = 404;
