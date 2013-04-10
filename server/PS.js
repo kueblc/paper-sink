@@ -104,7 +104,7 @@ function Client( roomId ){
 	var disconnectTimer;
 	self.setTimeout = function(){
 		clearTimeout( disconnectTimer );
-		setTimeout( self.disconnect, TIMEOUT );
+		disconnectTimer = setTimeout( self.disconnect, TIMEOUT );
 	};
 	self.clearTimeout = function(){
 		clearTimeout( disconnectTimer );
