@@ -1,22 +1,25 @@
-/* Init.js
+/* ChatRoom.js
  * written by Colin Kuebler 2013
- * Main entry point for the PaperSink server
+ * Demonstrates PaperSink by implementing a multi-room chat
  */
 
-var log = require('./Logger.js').log('PaperSink'),
-	server = require('./WebServer.js'),
-	PS = require('./PS.js');
+var log = require('../utils/Logger.js').log('ChatRoom'),
+	server = require('../utils/WebServer.js'),
+	PS = require('../lib/PS.js');
 
 // where the server is being hosted
 var HOST = undefined,
 	PORT = 8124;
 
 // serve static files
-var PATH = 'client/',
-	STATIC = [ 'index.html', 'style.css', 'ps.js' ];
+var PATH = 'chatroom/',
+	STATIC = [ 'index.html', 'style.css' ];
 
 for( var i = 0; i < STATIC.length; ++i )
 	server.serve( PATH, STATIC[i] );
+
+// serve client side PS library
+server.serve( '../lib/', 'ps.js' );
 
 // implements a JSON API
 
